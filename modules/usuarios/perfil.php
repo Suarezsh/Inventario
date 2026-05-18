@@ -5,6 +5,11 @@ require_once __DIR__ . '/../../includes/funciones.php';
 require_once __DIR__ . '/../../includes/csrf.php';
 
 $db = getDB();
+
+$stmt = $db->prepare("SELECT * FROM usuarios WHERE id = ?");
+$stmt->execute([USUARIO_ID]);
+$usuario = $stmt->fetch();
+
 $error = '';
 $success = '';
 
