@@ -223,7 +223,7 @@ require_once __DIR__ . '/includes/header.php';
                         <td><?= h($m['almacen']) ?></td>
                         <td>
                             <?php $tipos = ['entrada' => 'success', 'salida' => 'danger', 'transferencia' => 'info', 'ajuste' => 'warning']; ?>
-                            <span class="badge bg-<?= $tipos[$m['tipo_movimiento']] ?? 'secondary'] ?>">
+                            <span class="badge bg-<?= $tipos[$m['tipo_movimiento']] ?? 'secondary' ?>">
                                 <?= h(ucfirst($m['tipo_movimiento'])) ?>
                             </span>
                         </td>

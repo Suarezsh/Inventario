@@ -32,7 +32,7 @@ require_once __DIR__ . '/../../includes/header.php';
                         <td><?= h($t['destino']) ?></td>
                         <td>
                             <?php $estados = ['pendiente' => 'warning', 'en_transito' => 'info', 'completada' => 'success']; ?>
-                            <span class="badge bg-<?= $estados[$t['estado']] ?? 'secondary'] ?>"><?= h(ucfirst(str_replace('_', ' ', $t['estado']))) ?></span>
+                            <span class="badge bg-<?= $estados[$t['estado']] ?? 'secondary' ?>"><?= h(ucfirst(str_replace('_', ' ', $t['estado']))) ?></span>
                         </td>
                         <td><?= h($t['usuario']) ?></td>
                         <td>
