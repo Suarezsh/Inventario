@@ -1,0 +1,22 @@
+# Base de datos SQLite
+db/*.db
+db/*.sqlite
+db/*.db-journal
+db/*.db-wal
+db/*.db-shm
+
+# Uploads
+uploads/*
+
+# Entorno
+.env
+*.log
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/

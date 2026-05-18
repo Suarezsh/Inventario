@@ -1,0 +1,1114 @@
+================================================================================
+                   SISTEMA DE CONTROL DE INVENTARIO EMPRESARIAL
+                         REQUERIMIENTOS TÉCNICOS Y FUNCIONALES
+================================================================================
+Versión: 1.0
+Fecha: Mayo 2026
+Tecnología: PHP 8.x + SQLite3 + JavaScript (CDN)
+================================================================================
+
+ÍNDICE
+--------------------------------------------------------------------------------
+1. OBJETIVO DEL SISTEMA
+2. ARQUITECTURA GENERAL
+3. TECNOLOGÍAS Y LIBRERÍAS (CDN)
+4. MÓDULOS DEL SISTEMA
+   4.1. MÓDULO DE AUTENTICACIÓN Y USUARIOS
+   4.2. MÓDULO DE CONFIGURACIÓN EMPRESA
+   4.3. MÓDULO DE CATEGORÍAS Y SUBCATEGORÍAS
+   4.4. MÓDULO DE PRODUCTOS / ARTÍCULOS
+   4.5. MÓDULO DE PROVEEDORES
+   4.6. MÓDULO DE CLIENTES
+   4.7. MÓDULO DE INGRESOS / COMPRAS / ENTRADAS
+   4.8. MÓDULO DE SALIDAS / VENTAS / EGRESOS
+   4.9. MÓDULO DE AJUSTES DE INVENTARIO
+   4.10. MÓDULO DE TRANSFERENCIAS ENTRE ALMACENES
+   4.11. MÓDULO DE ALMACENES / SUCURSALES
+   4.12. MÓDULO DE REPORTES Y ESTADÍSTICAS
+   4.13. MÓDULO DE PDF (REPORTES IMPRIMIBLES)
+   4.14. MÓDULO DE NOTIFICACIONES Y ALERTAS
+   4.15. MÓDULO DE AUDITORÍA / LOGS
+   4.16. MÓDULO DE IMPORTACIÓN / EXPORTACIÓN (CSV/Excel)
+   4.17. MÓDULO DE BACKUP Y RESTAURACIÓN
+5. BASE DE DATOS (SQLite)
+   5.1. TABLAS
+   5.2. ESQUEMA DETALLADO
+6. INTERFAZ DE USUARIO
+7. SEGURIDAD
+8. PERSONALIZACIÓN / ADAPTABILIDAD
+9. CONSIDERACIONES TÉCNICAS ADICIONALES
+
+
+================================================================================
+1. OBJETIVO DEL SISTEMA
+================================================================================
+
+Desarrollar un sistema web de control de inventarios completo, modular,
+adaptable a cualquier rubro empresarial (comercio, industria, servicios,
+logística, retail, etc.). El sistema debe permitir:
+
+  - Registro y control de entradas y salidas de productos.
+  - Gestión de múltiples almacenes o sucursales.
+  - Trazabilidad completa de movimientos.
+  - Generación de reportes en pantalla y PDF.
+  - Alertas de stock mínimo y máximo.
+  - Importación/exportación de datos.
+  - Respaldo y restauración de la base de datos.
+  - Configuración flexible: el usuario puede activar/desactivar/editar
+    cualquier módulo o funcionalidad según sus necesidades.
+
+El sistema debe ser 100% funcional con PHP (sin framework) y SQLite3,
+utilizando librerías JavaScript vía CDN para la interfaz y generación de PDF.
+
+
+================================================================================
+2. ARQUITECTURA GENERAL
+================================================================================
+
+  - Backend:        PHP 8.x (estructura MVC simplificada, sin framework)
+                    con SQLite3 como motor de base de datos.
+  - Frontend:       HTML5 + CSS3 + JavaScript vanilla, apoyado en
+                    librerías CDN para UI, tablas, gráficos y PDF.
+  - Servidor web:   Apache / Nginx / XAMPP / Laragon / cualquier servidor
+                    con soporte PHP 8.x.
+  - Base de datos:  SQLite3 (archivo único .db o .sqlite).
+  - Sin dependencias externas (composer): todo se maneja con include/require
+    de PHP puro + CDN para frontend.
+
+
+================================================================================
+3. TECNOLOGÍAS Y LIBRERÍAS (CDN)
+================================================================================
+
+Todas las librerías se cargan desde CDN (no se descargan localmente).
+
+  LIBRERÍA                     PROPÓSITO
+  --------------------------------------------------------------------------
+  Bootstrap 5.3.x              Framework CSS responsivo
+  Bootstrap Icons              Iconos vectoriales
+  AdminLTE 4 (Bootstrap 5)     Plantilla de panel de administración
+  DataTables 1.13+             Tablas dinámicas con búsqueda, paginación,
+                               ordenamiento y exportación
+  Chart.js 4.x                 Gráficos estadísticos (barras, líneas, dona,
+                               pastel, radar)
+  jsPDF 2.x                    Generación de PDF en el cliente
+  jsPDF-AutoTable 3.x          Plug-in para tablas en jsPDF
+  html2canvas 1.x              Captura de elementos HTML para PDF/imagen
+  SweetAlert2 11.x             Modales y alertas bonitas y personalizables
+  Select2 4.x                  Selectores con búsqueda (mejor UX)
+  flatpickr 4.x                Selectores de fecha y hora avanzados
+  moment.js 2.x                Manejo y formato de fechas (opcional)
+  FileSaver.js 2.x             Guardar archivos desde el navegador
+  SheetJS (xlsx) 0.20+         Exportar/importar a Excel (.xlsx/.csv)
+  Font Awesome 6.x             Iconos adicionales (opcional, como respaldo)
+  jQuery 3.7+                  Requerido por DataTables, Select2, etc.
+  jQuery Validation 1.19+      Validación de formularios
+  Numeral.js / accounting.js   Formateo de números y monedas
+
+
+================================================================================
+4. MÓDULOS DEL SISTEMA
+================================================================================
+
+4.1. MÓDULO DE AUTENTICACIÓN Y USUARIOS
+--------------------------------------------------------------------------------
+  - Login con usuario y contraseña (hash bcrypt/argon2).
+  - Registro de usuarios (solo administrador puede crear).
+  - Roles: Administrador, Supervisor, Operador, Consulta.
+  - Permisos por rol y/o por usuario (CRUD granular).
+  - Bloqueo de cuenta tras N intentos fallidos.
+  - Recuperación de contraseña (opcional, vía email).
+  - Perfil de usuario con opción de cambiar contraseña.
+  - Cierre de sesión automático por inactividad (sesión PHP).
+  - El sistema debe permitir desactivar usuarios sin eliminarlos.
+  - ACTIVABLE/DESACTIVABLE: sí, módulo completo o por roles.
+
+4.2. MÓDULO DE CONFIGURACIÓN EMPRESA
+--------------------------------------------------------------------------------
+  - Nombre de la empresa, RUC/NIT/CUIT, dirección, teléfono, email, logo.
+  - Moneda predeterminada (símbolo, código ISO, nombre).
+  - Zona horaria, formato de fecha, formato de número.
+  - Impuesto predeterminado (IVA, GST, etc.) y porcentaje.
+  - Parámetros de inventario:
+      * Método de costeo: FIFO / LIFO / Promedio ponderado.
+      * Stock mínimo y máximo por defecto para productos nuevos.
+      * Unidad de medida predeterminada (unidades, kg, litros, etc.).
+      * Control de lotes: activar/desactivar.
+      * Control de fechas de vencimiento: activar/desactivar.
+  - Activar/desactivar módulos completos desde configuración.
+  - Personalización de colores del sistema (tema claro/oscuro).
+  - ACTIVABLE/DESACTIVABLE: siempre activo (configuración global).
+
+4.3. MÓDULO DE CATEGORÍAS Y SUBCATEGORÍAS
+--------------------------------------------------------------------------------
+  - CRUD completo de categorías.
+  - CRUD completo de subcategorías vinculadas a categorías.
+  - Niveles: subcategoría puede tener sub-subcategoría (jerarquía anidada).
+  - Estado: activo / inactivo (sin eliminar físicamente).
+  - Categorías genéricas precargadas opcionales según rubro.
+  - ACTIVABLE/DESACTIVABLE: sí.
+
+4.4. MÓDULO DE PRODUCTOS / ARTÍCULOS
+--------------------------------------------------------------------------------
+  - CRUD completo de productos.
+  - Campos:
+      * Código (SKU) único generado automática o manualmente.
+      * Código de barras (EAN/UPC, opcional).
+      * Nombre del producto.
+      * Descripción.
+      * Categoría / Subcategoría.
+      * Unidad de medida.
+      * Precio de compra (costo unitario).
+      * Precio de venta.
+      * Precio mayorista (opcional).
+      * Impuesto aplicable (porcentaje o fijo).
+      * Stock actual (calculado automáticamente por movimientos).
+      * Stock mínimo (alerta).
+      * Stock máximo (alerta).
+      * Stock de seguridad.
+      * Lote (si activado en configuración).
+      * Fecha de vencimiento (si activado en configuración).
+      * Tiempo de reposición/lead time (días).
+      * Proveedor(es) asociado(s).
+      * Ubicación en almacén (pasillo, estante, fila).
+      * Imagen del producto (cargada o URL).
+      * Notas internas.
+      * Estado: activo/inactivo.
+  - Búsqueda por código, nombre, categoría, proveedor.
+  - Duplicar producto.
+  - Productos compuestos (kits/packs) - opcional.
+  - Productos con variantes (talla, color, etc.) - opcional.
+  - ACTIVABLE/DESACTIVABLE: sí, módulo completo o campos específicos.
+
+4.5. MÓDULO DE PROVEEDORES
+--------------------------------------------------------------------------------
+  - CRUD completo de proveedores.
+  - Campos: razón social, RUC/NIT, contacto, teléfono, email, dirección,
+    sitio web, notas, estado (activo/inactivo).
+  - Productos asociados a cada proveedor.
+  - Historial de compras por proveedor.
+  - ACTIVABLE/DESACTIVABLE: sí.
+
+4.6. MÓDULO DE CLIENTES
+--------------------------------------------------------------------------------
+  - CRUD completo de clientes.
+  - Campos: nombre/razón social, RUC/NIT/DNI, contacto, teléfono, email,
+    dirección, tipo de cliente (minorista/mayorista), límite de crédito,
+    días de crédito, descuento especial, notas, estado (activo/inactivo).
+  - Historial de ventas por cliente.
+  - ACTIVABLE/DESACTIVABLE: sí.
+
+4.7. MÓDULO DE INGRESOS / COMPRAS / ENTRADAS
+--------------------------------------------------------------------------------
+  - Registro de entrada de inventario:
+      * Orden de compra / nota de ingreso.
+      * Número de documento (factura, guía, etc.).
+      * Proveedor.
+      * Fecha de ingreso.
+      * Fecha de documento.
+      * Almacén destino.
+      * Productos (cantidad, costo unitario, subtotal).
+      * Subtotal, impuesto, total.
+      * Forma de pago.
+      * Observaciones.
+  - Tipo de ingreso: compra, devolución de cliente, ajuste positivo,
+    producción/fabricación, transferencia desde otro almacén.
+  - Actualización automática del stock (según método de costeo).
+  - Edición y anulación de ingresos (con reversión de stock).
+  - Impresión de nota de ingreso (PDF).
+  - Búsqueda y filtrado por fecha, proveedor, documento, producto.
+  - ACTIVABLE/DESACTIVABLE: sí.
+
+4.8. MÓDULO DE SALIDAS / VENTAS / EGRESOS
+--------------------------------------------------------------------------------
+  - Registro de salida de inventario:
+      * Factura / boleta / nota de salida.
+      * Número de documento.
+      * Cliente.
+      * Fecha de salida.
+      * Almacén origen.
+      * Productos (cantidad, precio unitario, subtotal, descuento).
+      * Descuentos por producto y/o global.
+      * Subtotal, impuesto, total.
+      * Forma de pago (contado/crédito).
+      * Observaciones.
+  - Tipo de salida: venta, devolución a proveedor, ajuste negativo,
+    consumo interno, merma/pérdida, donación, transferencia.
+  - Validación de stock disponible antes de registrar (no permitir
+    salidas negativas sin autorización especial).
+  - Actualización automática del stock.
+  - Edición y anulación de salidas (con reversión de stock).
+  - Impresión de comprobante (PDF).
+  - Búsqueda y filtrado por fecha, cliente, documento, producto.
+  - ACTIVABLE/DESACTIVABLE: sí.
+
+4.9. MÓDULO DE AJUSTES DE INVENTARIO
+--------------------------------------------------------------------------------
+  - Corrección manual de stock por conteo físico o diferencia detectada.
+  - Tipo de ajuste: entrada (sobrante) / salida (faltante).
+  - Motivo del ajuste (obligatorio).
+  - Autorización requerida (rol administrador/supervisor).
+  - Registro en auditoría.
+  - Conteo cíclico: programar conteos por producto/categoría/almacén.
+  - ACTIVABLE/DESACTIVABLE: sí.
+
+4.10. MÓDULO DE TRANSFERENCIAS ENTRE ALMACENES
+--------------------------------------------------------------------------------
+  - Transferencia de stock de un almacén origen a uno destino.
+  - Productos, cantidades, fecha, observaciones.
+  - Actualización automática de stock (resta en origen, suma en destino).
+  - Estado de transferencia: pendiente, en tránsito, completada.
+  - Impresión de guía de remisión (PDF).
+  - ACTIVABLE/DESACTIVABLE: sí (depende de multi-almacén activado).
+
+4.11. MÓDULO DE ALMACENES / SUCURSALES
+--------------------------------------------------------------------------------
+  - CRUD de almacenes/sucursales.
+  - Campos: nombre, código, ubicación, encargado, teléfono, estado.
+  - Stock por almacén (cada producto tiene stock por almacén).
+  - Stock consolidado (suma de todos los almacenes).
+  - ACTIVABLE/DESACTIVABLE: sí (se puede usar un solo almacén por defecto).
+
+4.12. MÓDULO DE REPORTES Y ESTADÍSTICAS
+--------------------------------------------------------------------------------
+  Reportes en pantalla y PDF:
+
+  1) Reporte de existencias actuales (stock actual por producto/almacén).
+  2) Reporte de productos con stock bajo (menor o igual al mínimo).
+  3) Reporte de productos con stock alto (mayor o igual al máximo).
+  4) Reporte de productos por vencer / vencidos.
+  5) Reporte de movimientos (ingresos y salidas) por período.
+  6) Reporte de compras por proveedor.
+  7) Reporte de ventas por cliente.
+  8) Reporte de productos más vendidos (top N).
+  9) Reporte de productos menos rotados.
+ 10) Estado de resultados (inventario inicial + compras - ventas = final).
+ 11) Reporte de valor de inventario (costo total).
+ 12) Reporte de auditoría (logs de cambios).
+ 13) Reporte de transferencias.
+ 14) Reporte de ajustes.
+ 15) Dashboard con resumen ejecutivo (tarjetas KPI + gráficos).
+       - Total productos, total movimientos mes, stock bajo, valor total.
+       - Gráfico de ventas vs compras (líneas).
+       - Gráfico de productos top (barras).
+       - Gráfico de distribución por categoría (dona/pastel).
+  - Todos los reportes deben tener filtros por fecha, almacén, categoría,
+    producto, proveedor, cliente.
+  - Exportar reportes a PDF, CSV, Excel.
+  - ACTIVABLE/DESACTIVABLE: sí, cada reporte individualmente.
+
+4.13. MÓDULO DE PDF (REPORTES IMPRIMIBLES)
+--------------------------------------------------------------------------------
+  - Generación de PDF desde el frontend usando jsPDF + jsPDF-AutoTable.
+  - Opción de generar PDF desde el backend (TCPDF o FPDF cargado vía CDN o
+    desde una librería incluida manualmente — aunque la preferencia es jsPDF).
+  - Reportes PDF:
+      * Nota de ingreso / orden de compra.
+      * Comprobante de salida / factura.
+      * Guía de remisión (transferencia).
+      * Reporte de existencias.
+      * Reporte de movimientos.
+      * Hoja de conteo físico.
+  - El PDF debe incluir: logo de la empresa, nombre, RUC, fecha, número de
+    reporte, contenido tabular, totales, firma/espaacio para firma, pie de
+    página con "Sistema de Inventario v1.0".
+  - Diseño limpio y profesional.
+  - ACTIVABLE/DESACTIVABLE: sí.
+
+4.14. MÓDULO DE NOTIFICACIONES Y ALERTAS
+--------------------------------------------------------------------------------
+  - Alertas visuales en el dashboard (stock bajo, productos vencidos,
+    productos por vencer).
+  - Notificaciones por correo electrónico (opcional, si se configura SMTP).
+  - Alertas al momento de registrar una salida si el stock es insuficiente.
+  - Recordatorio de productos próximos a vencer (X días antes).
+  - HISTORIAL de notificaciones.
+  - ACTIVABLE/DESACTIVABLE: sí.
+
+4.15. MÓDULO DE AUDITORÍA / LOGS
+--------------------------------------------------------------------------------
+  - Registro automático de todas las acciones CRUD del sistema:
+      * Usuario que realizó la acción.
+      * Fecha y hora.
+      * Tipo de acción (crear, editar, eliminar, anular, etc.).
+      * Módulo afectado.
+      * Descripción del cambio (incluye valores anteriores y nuevos en JSON).
+      * Dirección IP.
+  - Logs visibles solo para administradores.
+  - Búsqueda y filtrado en logs.
+  - ACTIVABLE/DESACTIVABLE: sí.
+
+4.16. MÓDULO DE IMPORTACIÓN / EXPORTACIÓN (CSV/Excel)
+--------------------------------------------------------------------------------
+  - Importación masiva de productos desde CSV o Excel (.xlsx) vía SheetJS.
+  - Importación de proveedores, clientes.
+  - Exportación de cualquier reporte o listado a CSV, Excel, PDF.
+  - Plantilla de importación descargable.
+  - Validación de datos antes de importar (previsualización de errores).
+  - ACTIVABLE/DESACTIVABLE: sí.
+
+4.17. MÓDULO DE BACKUP Y RESTAURACIÓN
+--------------------------------------------------------------------------------
+  - Backup de la base de datos SQLite desde el panel de administración.
+  - Descarga del archivo .db respaldado.
+  - Restauración desde archivo .db o .sqlite subido.
+  - Programación de backups automáticos (vía cron/task scheduler o
+    mediante un script PHP llamado periódicamente).
+  - Historial de backups (fecha, tamaño, usuario que lo realizó).
+  - Tabla independiente para registro de backups.
+  - ACTIVABLE/DESACTIVABLE: sí.
+
+
+================================================================================
+5. BASE DE DATOS (SQLite)
+================================================================================
+
+5.1. TABLAS PRINCIPALES
+--------------------------------------------------------------------------------
+
+  No.  TABLA                          PROPÓSITO
+  ---  ------------------------------ ---------------------------------------
+   1   usuarios                       Usuarios del sistema
+   2   roles                          Roles y permisos
+   3   permisos_roles                 Permisos asignados a roles
+   4   configuracion                  Configuración general de la empresa
+   5   modulos                        Módulos del sistema (activo/inactivo)
+   6   categorias                     Categorías de productos
+   7   subcategorias                  Subcategorías (jerarquía opcional)
+   8   almacenes                      Almacenes/sucursales
+   9   proveedores                    Proveedores
+  10   clientes                       Clientes
+  11   productos                      Catálogo de productos
+  12   producto_proveedor             Relación producto-proveedor (N:M)
+  13   producto_almacen               Stock por producto y almacén
+  14   ingresos                       Cabecera de ingresos/compras
+  15   ingreso_detalles               Detalle de productos en ingreso
+  16   salidas                        Cabecera de salidas/ventas
+  17   salida_detalles                Detalle de productos en salida
+  18   transferencias                 Cabecera de transferencias
+  19   transferencia_detalles         Detalle de transferencias
+  20   ajustes                        Cabecera de ajustes de inventario
+  21   ajuste_detalles                Detalle de ajustes
+  22   movimientos_inventario         Registro histórico de todos los
+                                      movimientos (trigger o insert manual)
+  23   auditoria_logs                 Log de auditoría
+  24   notificaciones                 Alertas y notificaciones
+  25   backups                        Historial de backups
+  26   impuestos                      Tabla de impuestos (configurables)
+  27   formas_pago                    Formas de pago
+  28   unidades_medida                Unidades de medida
+
+
+5.2. ESQUEMA DETALLADO (SQL DDL)
+--------------------------------------------------------------------------------
+
+-- =====================================================================
+-- TABLA: usuarios
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS usuarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    nombre_completo TEXT NOT NULL,
+    email TEXT,
+    telefono TEXT,
+    id_rol INTEGER NOT NULL,
+    activo INTEGER DEFAULT 1,
+    ultimo_acceso TEXT,
+    intentos_fallidos INTEGER DEFAULT 0,
+    bloqueado INTEGER DEFAULT 0,
+    creado_por INTEGER,
+    fecha_creacion TEXT DEFAULT (datetime('now','localtime')),
+    fecha_actualizacion TEXT,
+    FOREIGN KEY (id_rol) REFERENCES roles(id)
+);
+
+-- =====================================================================
+-- TABLA: roles
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS roles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT UNIQUE NOT NULL,
+    descripcion TEXT,
+    nivel INTEGER DEFAULT 1,
+    activo INTEGER DEFAULT 1
+);
+
+-- Insertar roles por defecto
+INSERT OR IGNORE INTO roles (id, nombre, descripcion, nivel) VALUES
+    (1, 'Administrador', 'Acceso total al sistema', 100),
+    (2, 'Supervisor', 'Acceso a gestión y reportes', 80),
+    (3, 'Operador', 'Registro de movimientos básicos', 50),
+    (4, 'Consulta', 'Solo lectura de reportes', 10);
+
+-- =====================================================================
+-- TABLA: permisos_roles
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS permisos_roles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_rol INTEGER NOT NULL,
+    modulo TEXT NOT NULL,
+    permiso_crear INTEGER DEFAULT 0,
+    permiso_leer INTEGER DEFAULT 1,
+    permiso_editar INTEGER DEFAULT 0,
+    permiso_eliminar INTEGER DEFAULT 0,
+    permiso_exportar INTEGER DEFAULT 0,
+    FOREIGN KEY (id_rol) REFERENCES roles(id)
+);
+
+-- =====================================================================
+-- TABLA: configuracion
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS configuracion (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    clave TEXT UNIQUE NOT NULL,
+    valor TEXT NOT NULL,
+    tipo TEXT DEFAULT 'texto',
+    descripcion TEXT
+);
+
+-- Insertar configuración por defecto
+INSERT OR IGNORE INTO configuracion (clave, valor, tipo, descripcion) VALUES
+    ('empresa_nombre', 'Mi Empresa', 'texto', 'Nombre de la empresa'),
+    ('empresa_ruc', '00000000000', 'texto', 'RUC/NIT/CUIT'),
+    ('empresa_direccion', '', 'texto', 'Dirección'),
+    ('empresa_telefono', '', 'texto', 'Teléfono'),
+    ('empresa_email', '', 'texto', 'Correo electrónico'),
+    ('empresa_logo', '', 'imagen', 'Logo (URL o base64)'),
+    ('moneda_simbolo', '$', 'texto', 'Símbolo de moneda'),
+    ('moneda_codigo', 'USD', 'texto', 'Código ISO de moneda'),
+    ('moneda_nombre', 'Dólar', 'texto', 'Nombre de la moneda'),
+    ('zona_horaria', 'America/Lima', 'texto', 'Zona horaria'),
+    ('formato_fecha', 'Y-m-d', 'texto', 'Formato de fecha'),
+    ('formato_hora', 'H:i:s', 'texto', 'Formato de hora'),
+    ('impuesto_nombre', 'IVA', 'texto', 'Nombre del impuesto'),
+    ('impuesto_porcentaje', '0', 'numero', 'Porcentaje de impuesto'),
+    ('metodo_costeo', 'promedio', 'texto', 'promedio/fifo/lifo'),
+    ('stock_minimo_default', '0', 'numero', 'Stock mínimo por defecto'),
+    ('stock_maximo_default', '0', 'numero', 'Stock máximo por defecto'),
+    ('unidad_medida_default', 'Unidad', 'texto', 'Unidad de medida por defecto'),
+    ('control_lotes', '0', 'booleano', 'Activar control de lotes'),
+    ('control_vencimiento', '0', 'booleano', 'Activar control de vencimiento'),
+    ('multi_almacen', '0', 'booleano', 'Activar múltiples almacenes'),
+    ('tema_color', 'light', 'texto', 'light/dark'),
+    ('items_por_pagina', '25', 'numero', 'Registros por página en tablas');
+
+-- =====================================================================
+-- TABLA: modulos
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS modulos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT UNIQUE NOT NULL,
+    clave TEXT UNIQUE NOT NULL,
+    activo INTEGER DEFAULT 1,
+    orden INTEGER DEFAULT 0,
+    descripcion TEXT
+);
+
+INSERT OR IGNORE INTO modulos (nombre, clave, activo, orden, descripcion) VALUES
+    ('Usuarios y Roles', 'usuarios', 1, 1, 'Gestión de usuarios y permisos'),
+    ('Configuración', 'configuracion', 1, 2, 'Configuración de la empresa'),
+    ('Categorías', 'categorias', 1, 3, 'Categorías y subcategorías'),
+    ('Productos', 'productos', 1, 4, 'Catálogo de productos'),
+    ('Proveedores', 'proveedores', 1, 5, 'Gestión de proveedores'),
+    ('Clientes', 'clientes', 1, 6, 'Gestión de clientes'),
+    ('Ingresos', 'ingresos', 1, 7, 'Compras y entradas'),
+    ('Salidas', 'salidas', 1, 8, 'Ventas y salidas'),
+    ('Ajustes', 'ajustes', 1, 9, 'Ajustes de inventario'),
+    ('Transferencias', 'transferencias', 1, 10, 'Transferencias entre almacenes'),
+    ('Almacenes', 'almacenes', 1, 11, 'Gestión de almacenes/sucursales'),
+    ('Reportes', 'reportes', 1, 12, 'Reportes y estadísticas'),
+    ('PDF', 'pdf', 1, 13, 'Generación de PDF'),
+    ('Alertas', 'alertas', 1, 14, 'Notificaciones y alertas'),
+    ('Auditoría', 'auditoria', 1, 15, 'Logs de auditoría'),
+    ('Importar/Exportar', 'import_export', 1, 16, 'Importación y exportación'),
+    ('Backups', 'backups', 1, 17, 'Backup y restauración');
+
+-- =====================================================================
+-- TABLA: categorias
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS categorias (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    descripcion TEXT,
+    activo INTEGER DEFAULT 1,
+    fecha_creacion TEXT DEFAULT (datetime('now','localtime'))
+);
+
+-- =====================================================================
+-- TABLA: subcategorias
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS subcategorias (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_categoria INTEGER NOT NULL,
+    nombre TEXT NOT NULL,
+    descripcion TEXT,
+    id_padre INTEGER DEFAULT NULL,
+    activo INTEGER DEFAULT 1,
+    fecha_creacion TEXT DEFAULT (datetime('now','localtime')),
+    FOREIGN KEY (id_categoria) REFERENCES categorias(id),
+    FOREIGN KEY (id_padre) REFERENCES subcategorias(id)
+);
+
+-- =====================================================================
+-- TABLA: almacenes
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS almacenes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    codigo TEXT UNIQUE NOT NULL,
+    nombre TEXT NOT NULL,
+    ubicacion TEXT,
+    encargado TEXT,
+    telefono TEXT,
+    activo INTEGER DEFAULT 1,
+    fecha_creacion TEXT DEFAULT (datetime('now','localtime'))
+);
+
+INSERT OR IGNORE INTO almacenes (id, codigo, nombre, ubicacion, activo) VALUES
+    (1, 'ALM-001', 'Almacén Principal', 'Sede central', 1);
+
+-- =====================================================================
+-- TABLA: proveedores
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS proveedores (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    razon_social TEXT NOT NULL,
+    ruc TEXT,
+    contacto TEXT,
+    telefono TEXT,
+    email TEXT,
+    direccion TEXT,
+    sitio_web TEXT,
+    notas TEXT,
+    activo INTEGER DEFAULT 1,
+    fecha_creacion TEXT DEFAULT (datetime('now','localtime'))
+);
+
+-- =====================================================================
+-- TABLA: clientes
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS clientes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tipo_documento TEXT DEFAULT 'DNI',
+    numero_documento TEXT,
+    nombre TEXT NOT NULL,
+    direccion TEXT,
+    telefono TEXT,
+    email TEXT,
+    tipo_cliente TEXT DEFAULT 'minorista',
+    limite_credito REAL DEFAULT 0,
+    dias_credito INTEGER DEFAULT 0,
+    descuento_especial REAL DEFAULT 0,
+    notas TEXT,
+    activo INTEGER DEFAULT 1,
+    fecha_creacion TEXT DEFAULT (datetime('now','localtime'))
+);
+
+-- =====================================================================
+-- TABLA: productos
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS productos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    codigo TEXT UNIQUE NOT NULL,
+    codigo_barras TEXT,
+    nombre TEXT NOT NULL,
+    descripcion TEXT,
+    id_categoria INTEGER,
+    id_subcategoria INTEGER,
+    id_unidad_medida INTEGER,
+    costo_promedio REAL DEFAULT 0,
+    precio_compra REAL DEFAULT 0,
+    precio_venta REAL DEFAULT 0,
+    precio_mayorista REAL DEFAULT 0,
+    id_impuesto INTEGER,
+    stock_minimo REAL DEFAULT 0,
+    stock_maximo REAL DEFAULT 0,
+    stock_seguridad REAL DEFAULT 0,
+    lead_time_dias INTEGER DEFAULT 0,
+    ubicacion_almacen TEXT,
+    imagen TEXT,
+    notas TEXT,
+    activo INTEGER DEFAULT 1,
+    fecha_creacion TEXT DEFAULT (datetime('now','localtime')),
+    FOREIGN KEY (id_categoria) REFERENCES categorias(id),
+    FOREIGN KEY (id_subcategoria) REFERENCES subcategorias(id),
+    FOREIGN KEY (id_unidad_medida) REFERENCES unidades_medida(id),
+    FOREIGN KEY (id_impuesto) REFERENCES impuestos(id)
+);
+
+-- =====================================================================
+-- TABLA: producto_proveedor
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS producto_proveedor (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_producto INTEGER NOT NULL,
+    id_proveedor INTEGER NOT NULL,
+    codigo_proveedor TEXT,
+    precio_compra REAL,
+    tiempo_entrega INTEGER,
+    FOREIGN KEY (id_producto) REFERENCES productos(id),
+    FOREIGN KEY (id_proveedor) REFERENCES proveedores(id)
+);
+
+-- =====================================================================
+-- TABLA: producto_almacen (stock por almacén)
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS producto_almacen (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_producto INTEGER NOT NULL,
+    id_almacen INTEGER NOT NULL,
+    stock_actual REAL DEFAULT 0,
+    FOREIGN KEY (id_producto) REFERENCES productos(id),
+    FOREIGN KEY (id_almacen) REFERENCES almacenes(id)
+);
+
+-- =====================================================================
+-- TABLA: ingresos (cabecera)
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS ingresos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tipo_ingreso TEXT DEFAULT 'compra',
+    numero_documento TEXT NOT NULL,
+    id_proveedor INTEGER,
+    fecha_ingreso TEXT NOT NULL,
+    fecha_documento TEXT,
+    id_almacen INTEGER NOT NULL,
+    subtotal REAL DEFAULT 0,
+    impuesto REAL DEFAULT 0,
+    total REAL DEFAULT 0,
+    id_forma_pago INTEGER,
+    notas TEXT,
+    anulado INTEGER DEFAULT 0,
+    fecha_anulacion TEXT,
+    usuario_anulacion INTEGER,
+    creado_por INTEGER,
+    fecha_creacion TEXT DEFAULT (datetime('now','localtime')),
+    FOREIGN KEY (id_proveedor) REFERENCES proveedores(id),
+    FOREIGN KEY (id_almacen) REFERENCES almacenes(id),
+    FOREIGN KEY (id_forma_pago) REFERENCES formas_pago(id),
+    FOREIGN KEY (creado_por) REFERENCES usuarios(id)
+);
+
+-- =====================================================================
+-- TABLA: ingreso_detalles
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS ingreso_detalles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_ingreso INTEGER NOT NULL,
+    id_producto INTEGER NOT NULL,
+    cantidad REAL NOT NULL,
+    costo_unitario REAL NOT NULL,
+    subtotal REAL NOT NULL,
+    lote TEXT,
+    fecha_vencimiento TEXT,
+    FOREIGN KEY (id_ingreso) REFERENCES ingresos(id),
+    FOREIGN KEY (id_producto) REFERENCES productos(id)
+);
+
+-- =====================================================================
+-- TABLA: salidas (cabecera)
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS salidas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tipo_salida TEXT DEFAULT 'venta',
+    numero_documento TEXT NOT NULL,
+    id_cliente INTEGER,
+    fecha_salida TEXT NOT NULL,
+    fecha_documento TEXT,
+    id_almacen INTEGER NOT NULL,
+    subtotal REAL DEFAULT 0,
+    descuento REAL DEFAULT 0,
+    impuesto REAL DEFAULT 0,
+    total REAL DEFAULT 0,
+    id_forma_pago INTEGER,
+    notas TEXT,
+    anulado INTEGER DEFAULT 0,
+    fecha_anulacion TEXT,
+    usuario_anulacion INTEGER,
+    creado_por INTEGER,
+    fecha_creacion TEXT DEFAULT (datetime('now','localtime')),
+    FOREIGN KEY (id_cliente) REFERENCES clientes(id),
+    FOREIGN KEY (id_almacen) REFERENCES almacenes(id),
+    FOREIGN KEY (id_forma_pago) REFERENCES formas_pago(id),
+    FOREIGN KEY (creado_por) REFERENCES usuarios(id)
+);
+
+-- =====================================================================
+-- TABLA: salida_detalles
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS salida_detalles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_salida INTEGER NOT NULL,
+    id_producto INTEGER NOT NULL,
+    cantidad REAL NOT NULL,
+    precio_unitario REAL NOT NULL,
+    descuento REAL DEFAULT 0,
+    subtotal REAL NOT NULL,
+    lote TEXT,
+    FOREIGN KEY (id_salida) REFERENCES salidas(id),
+    FOREIGN KEY (id_producto) REFERENCES productos(id)
+);
+
+-- =====================================================================
+-- TABLA: transferencias (cabecera)
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS transferencias (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    numero_guia TEXT NOT NULL,
+    id_almacen_origen INTEGER NOT NULL,
+    id_almacen_destino INTEGER NOT NULL,
+    fecha_transferencia TEXT NOT NULL,
+    estado TEXT DEFAULT 'pendiente',
+    notas TEXT,
+    creado_por INTEGER,
+    fecha_creacion TEXT DEFAULT (datetime('now','localtime')),
+    FOREIGN KEY (id_almacen_origen) REFERENCES almacenes(id),
+    FOREIGN KEY (id_almacen_destino) REFERENCES almacenes(id),
+    FOREIGN KEY (creado_por) REFERENCES usuarios(id)
+);
+
+-- =====================================================================
+-- TABLA: transferencia_detalles
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS transferencia_detalles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_transferencia INTEGER NOT NULL,
+    id_producto INTEGER NOT NULL,
+    cantidad REAL NOT NULL,
+    lote TEXT,
+    FOREIGN KEY (id_transferencia) REFERENCES transferencias(id),
+    FOREIGN KEY (id_producto) REFERENCES productos(id)
+);
+
+-- =====================================================================
+-- TABLA: ajustes (cabecera)
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS ajustes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tipo_ajuste TEXT NOT NULL, -- 'entrada' o 'salida'
+    motivo TEXT NOT NULL,
+    id_almacen INTEGER NOT NULL,
+    fecha_ajuste TEXT NOT NULL,
+    autorizado_por INTEGER,
+    notas TEXT,
+    creado_por INTEGER,
+    fecha_creacion TEXT DEFAULT (datetime('now','localtime')),
+    FOREIGN KEY (id_almacen) REFERENCES almacenes(id),
+    FOREIGN KEY (creado_por) REFERENCES usuarios(id)
+);
+
+-- =====================================================================
+-- TABLA: ajuste_detalles
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS ajuste_detalles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_ajuste INTEGER NOT NULL,
+    id_producto INTEGER NOT NULL,
+    cantidad REAL NOT NULL,
+    costo_unitario REAL DEFAULT 0,
+    motivo_detalle TEXT,
+    FOREIGN KEY (id_ajuste) REFERENCES ajustes(id),
+    FOREIGN KEY (id_producto) REFERENCES productos(id)
+);
+
+-- =====================================================================
+-- TABLA: movimientos_inventario (historial de todos los movimientos)
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS movimientos_inventario (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_producto INTEGER NOT NULL,
+    id_almacen INTEGER NOT NULL,
+    tipo_movimiento TEXT NOT NULL,
+    tipo_documento TEXT NOT NULL,
+    id_documento INTEGER NOT NULL,
+    cantidad REAL NOT NULL,
+    costo_unitario REAL,
+    stock_anterior REAL,
+    stock_posterior REAL,
+    fecha_movimiento TEXT DEFAULT (datetime('now','localtime')),
+    usuario INTEGER,
+    FOREIGN KEY (id_producto) REFERENCES productos(id),
+    FOREIGN KEY (id_almacen) REFERENCES almacenes(id),
+    FOREIGN KEY (usuario) REFERENCES usuarios(id)
+);
+
+-- =====================================================================
+-- TABLA: auditoria_logs
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS auditoria_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_usuario INTEGER,
+    usuario_nombre TEXT,
+    accion TEXT NOT NULL,
+    modulo TEXT NOT NULL,
+    id_registro INTEGER,
+    descripcion TEXT,
+    valores_anteriores TEXT,
+    valores_nuevos TEXT,
+    direccion_ip TEXT,
+    fecha_hora TEXT DEFAULT (datetime('now','localtime')),
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+);
+
+-- =====================================================================
+-- TABLA: notificaciones
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS notificaciones (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tipo TEXT NOT NULL,
+    titulo TEXT NOT NULL,
+    mensaje TEXT NOT NULL,
+    id_referencia INTEGER,
+    modulo_referencia TEXT,
+    leido INTEGER DEFAULT 0,
+    fecha_creacion TEXT DEFAULT (datetime('now','localtime')),
+    fecha_lectura TEXT
+);
+
+-- =====================================================================
+-- TABLA: backups
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS backups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre_archivo TEXT NOT NULL,
+    tamano_bytes INTEGER NOT NULL,
+    tipo TEXT DEFAULT 'manual',
+    creado_por INTEGER,
+    fecha_creacion TEXT DEFAULT (datetime('now','localtime')),
+    FOREIGN KEY (creado_por) REFERENCES usuarios(id)
+);
+
+-- =====================================================================
+-- TABLA: impuestos
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS impuestos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    porcentaje REAL NOT NULL,
+    activo INTEGER DEFAULT 1
+);
+
+INSERT OR IGNORE INTO impuestos (id, nombre, porcentaje, activo) VALUES
+    (1, 'Exento', 0, 1),
+    (2, 'IVA 0%', 0, 1),
+    (3, 'IVA 5%', 5, 1),
+    (4, 'IVA 10%', 10, 1),
+    (5, 'IVA 19%', 19, 1);
+
+-- =====================================================================
+-- TABLA: formas_pago
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS formas_pago (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    activo INTEGER DEFAULT 1
+);
+
+INSERT OR IGNORE INTO formas_pago (id, nombre) VALUES
+    (1, 'Efectivo'),
+    (2, 'Tarjeta de crédito'),
+    (3, 'Tarjeta de débito'),
+    (4, 'Transferencia bancaria'),
+    (5, 'Cheque'),
+    (6, 'Crédito'),
+    (7, 'Otro');
+
+-- =====================================================================
+-- TABLA: unidades_medida
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS unidades_medida (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    abreviatura TEXT NOT NULL,
+    activo INTEGER DEFAULT 1
+);
+
+INSERT OR IGNORE INTO unidades_medida (nombre, abreviatura) VALUES
+    ('Unidad', 'Und'),
+    ('Kilogramo', 'Kg'),
+    ('Gramo', 'g'),
+    ('Libra', 'lb'),
+    ('Litro', 'L'),
+    ('Mililitro', 'mL'),
+    ('Metro', 'm'),
+    ('Centímetro', 'cm'),
+    ('Pulgada', 'in'),
+    ('Caja', 'Cja'),
+    ('Paquete', 'Pqte'),
+    ('Docena', 'Doc'),
+    ('Par', 'Par'),
+    ('Rollo', 'Rollo'),
+    ('M2', 'm²'),
+    ('Galón', 'Gal'),
+    ('Botella', 'Bot'),
+    ('Sobre', 'Sobre'),
+    ('Bolsa', 'Bolsa'),
+    ('Tarima', 'Tar');
+
+
+================================================================================
+6. INTERFAZ DE USUARIO
+================================================================================
+
+  - Diseño responsivo (Bootstrap 5 + AdminLTE 4).
+  - Sidebar con menú colapsable con todos los módulos.
+  - Dashboard principal con tarjetas KPI y gráficos (Chart.js).
+  - Tablas con DataTables (búsqueda, ordenamiento, paginación, exportación).
+  - Formularios con validación (jQuery Validation + HTML5).
+  - Selectores con Select2 (búsqueda en selects de productos, clientes, etc.).
+  - Selectores de fecha con flatpickr.
+  - Modales y confirmaciones con SweetAlert2.
+  - Toastr/Bootstrap Toast para notificaciones flash.
+  - Modo claro/oscuro configurable.
+  - Personalización de colores del sidebar y cabecera.
+  - Breadcrumbs (migas de pan) en cada página.
+  - Tooltips en botones de acción.
+
+  Páginas principales:
+
+    PANTALLA                    RUTA (ejemplo)
+    ----------------------------------------------------------------------
+    Login                       login.php
+    Dashboard                   index.php
+    Perfil de usuario           perfil.php
+    Gestión de usuarios         usuarios.php
+    Roles y permisos            roles.php
+    Configuración               configuracion.php
+    Categorías                  categorias.php
+    Subcategorías               subcategorias.php
+    Productos                   productos.php
+    Producto detalle            producto_detalle.php?id=X
+    Proveedores                 proveedores.php
+    Clientes                    clientes.php
+    Ingresos / Compras          ingresos.php
+    Nuevo ingreso               ingreso_nuevo.php
+    Salidas / Ventas            salidas.php
+    Nueva salida                salida_nueva.php
+    Transferencias              transferencias.php
+    Nueva transferencia         transferencia_nueva.php
+    Ajustes                     ajustes.php
+    Nuevo ajuste                ajuste_nuevo.php
+    Almacenes                   almacenes.php
+    Stock por almacén           stock_almacen.php?id=X
+    Reporte existencias         reporte_existencias.php
+    Reporte movimientos         reporte_movimientos.php
+    Reporte ventas              reporte_ventas.php
+    Reporte compras             reporte_compras.php
+    Reporte kárdex              reporte_kardex.php
+    Auditoría                   auditoria.php
+    Notificaciones              notificaciones.php
+    Importar                    importar.php
+    Exportar                    exportar.php
+    Backups                     backups.php
+
+
+================================================================================
+7. SEGURIDAD
+================================================================================
+
+  - Autenticación obligatoria para todas las páginas excepto login.
+  - Sesiones PHP con tiempo de expiración.
+  - Contraseñas almacenadas con password_hash() (bcrypt).
+  - CSRF token en todos los formularios.
+  - Validación del lado del servidor (no confiar solo en frontend).
+  - Preparación de consultas SQL (prepared statements via PDO).
+  - SQLite: modo journal WAL (Write-Ahead Log) para mejor concurrencia.
+  - Escape de salida HTML (htmlspecialchars).
+  - Control de acceso basado en roles.
+  - Registro de intentos de acceso no autorizado en auditoría.
+  - Bloqueo de cuenta por intentos fallidos.
+  - Protección contra XSS y SQL Injection.
+  - Archivo .htaccess o .htpasswd para proteger el directorio db/.
+  - La base de datos SQLite debe estar FUERA del webroot o protegida.
+  - Backup cifrado (opcional).
+
+
+================================================================================
+8. PERSONALIZACIÓN / ADAPTABILIDAD
+================================================================================
+
+  El sistema debe ser completamente adaptable a cualquier tipo de empresa
+  mediante:
+
+  - Configuración centralizada (tabla configuracion).
+  - Activación/desactivación de módulos completos (tabla modulos).
+  - Permisos granulares por rol.
+  - El usuario puede ocultar del menú los módulos que no usa.
+  - Campos configurables (unidad de medida, impuesto, moneda).
+  - Temas visuales (claro/oscuro, colores).
+  - Método de costeo intercambiable (FIFO, LIFO, promedio).
+  - Tipos de ingreso y salida editables/ampliables.
+  - Formas de pago editables.
+  - Unidades de medida editables.
+  - Impuestos editables.
+  - Logo e información corporativa personalizable.
+  - No requiere conocimientos técnicos para adaptación básica.
+  - Código fuente abierto y comentado para modificaciones avanzadas.
+
+
+================================================================================
+9. CONSIDERACIONES TÉCNICAS ADICIONALES
+================================================================================
+
+  - PDO como capa de abstracción para SQLite (fácil migración a MySQL
+    si se desea en el futuro).
+  - Estructura de directorios:
+
+        inventario/
+        ├── index.php                 (Dashboard)
+        ├── login.php                 (Login)
+        ├── logout.php                (Cierre de sesión)
+        ├── config/                   (Configuración de la aplicación)
+        │   ├── database.php          (Conexión PDO a SQLite)
+        │   └── app.php               (Constantes y helpers)
+        ├── includes/                 (Archivos incluidos)
+        │   ├── header.php            (Head + navbar + sidebar)
+        │   ├── footer.php            (Scripts y cierre)
+        │   ├── auth_check.php        (Verificación de sesión)
+        │   ├── csrf.php              (Tokens CSRF)
+        │   ├── funciones.php         (Funciones utilitarias)
+        │   └── permisos.php          (Verificación de permisos)
+        ├── modules/                  (Módulos individuales)
+        │   ├── usuarios/
+        │   ├── categorias/
+        │   ├── productos/
+        │   ├── proveedores/
+        │   ├── clientes/
+        │   ├── ingresos/
+        │   ├── salidas/
+        │   ├── transferencias/
+        │   ├── ajustes/
+        │   ├── almacenes/
+        │   ├── reportes/
+        │   ├── auditoria/
+        │   ├── notificaciones/
+        │   ├── import_export/
+        │   └── backups/
+        ├── assets/                   (CSS/JS locales si se requiere)
+        │   ├── css/
+        │   │   └── style.css         (Estilos personalizados)
+        │   └── js/
+        │       ├── app.js            (Funciones globales JS)
+        │       └── reportes.js       (Generación de PDF/gráficos)
+        ├── db/                       (Base de datos SQLite)
+        │   ├── inventario.db
+        │   └── .htaccess             (Deny all)
+        ├── uploads/                  (Imágenes subidas)
+        └── setup.php                 (Instalación inicial de BD)
+
+  - Cada módulo debe ser autocontenido (sus propias consultas, lógica y
+    vistas) para facilitar la desactivación.
+  - El sistema debe manejar concurrencia básica (transacciones SQLite,
+    bloqueo de escritura).
+  - Para producción con múltiples usuarios concurrentes, se recomienda
+    migrar a MySQL/MariaDB. El diseño PDO lo facilita.
+  - Los reportes PDF deben generarse en el frontend con jsPDF+AutoTable
+    y opcionalmente en backend con FPDF/TCPDF si se requiere servidor.
+  - Los backups deben comprimir el archivo .db y permitir descargarlo.
+  - La instalación inicial (setup.php) debe crear todas las tablas y
+    datos por defecto, y crear el primer usuario administrador.
+
+
+================================================================================
+                         FIN DEL DOCUMENTO
+================================================================================
