@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../config/app.php';
 require_once __DIR__ . '/funciones.php';
+require_once __DIR__ . '/permisos.php';
 
 if (!isset($_SESSION['usuario_id'])) {
     redirect(BASE_URL . '/login.php');

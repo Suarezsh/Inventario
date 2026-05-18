@@ -5,8 +5,13 @@ define('APP_VERSION', '1.0.0');
 
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-$dir = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/'), '/');
-define('BASE_URL', $protocol . '://' . $host . $dir);
+
+$projectRoot = str_replace('\\', '/', realpath(__DIR__ . '/..'));
+$docRoot = str_replace('\\', '/', realpath($_SERVER['DOCUMENT_ROOT']));
+$projectDir = str_replace($docRoot, '', $projectRoot);
+
+define('BASE_URL', $protocol . '://' . $host . $projectDir);
+define('ROOT_PATH', $projectRoot);
 
 session_name('INVENTARIO_SESSION');
 if (session_status() === PHP_SESSION_NONE) {

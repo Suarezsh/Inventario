@@ -1,11 +1,17 @@
         </section>
     </div>
 
-    <footer class="main-footer">
-        <div class="float-right d-none d-sm-block">
-            <b>Versión</b> <?= APP_VERSION ?>
+    <footer class="main-footer border-top">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-6">
+                    <strong>&copy; <?= date('Y') ?> <?= h(APP_NAME) ?>.</strong> Todos los derechos reservados.
+                </div>
+                <div class="col-sm-6 text-end">
+                    <b>Versión</b> <?= APP_VERSION ?>
+                </div>
+            </div>
         </div>
-        <strong>&copy; <?= date('Y') ?> <?= h(APP_NAME) ?>.</strong> Todos los derechos reservados.
     </footer>
 </div>
 
@@ -29,80 +35,70 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/numeral@2.0.6/numeral.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="<?= BASE_URL ?>/assets/js/app.js"></script>
 
 <script>
-    flatpickr.setDefaults({
-        locale: 'es',
-        dateFormat: 'Y-m-d',
-        allowInput: true
+flatpickr.setDefaults({
+    locale: 'es',
+    dateFormat: 'Y-m-d',
+    allowInput: true
+});
+
+$(document).ready(function() {
+    $('.datatable').each(function() {
+        if (!$.fn.DataTable.isDataTable(this)) {
+            $(this).DataTable({
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                },
+                pageLength: <?= (int)(config('items_por_pagina', 25)) ?>,
+                responsive: true,
+                dom: '<"d-flex justify-content-between align-items-center mb-3"B>frtip',
+                buttons: [
+                    { extend: 'copy', text: '<i class="bi bi-copy"></i> Copiar', className: 'btn btn-sm btn-outline-secondary' },
+                    { extend: 'excel', text: '<i class="bi bi-file-earmark-excel"></i> Excel', className: 'btn btn-sm btn-outline-success' },
+                    { extend: 'pdf', text: '<i class="bi bi-file-earmark-pdf"></i> PDF', className: 'btn btn-sm btn-outline-danger' },
+                    { extend: 'print', text: '<i class="bi bi-printer"></i> Imprimir', className: 'btn btn-sm btn-outline-primary' }
+                ]
+            });
+        }
     });
 
-    $(document).ready(function() {
-        $('.datatable').DataTable({
-            language: {
-                url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
-            },
-            pageLength: <?= (int)(config('items_por_pagina', 25)) ?>,
-            responsive: true,
-            dom: 'Bfrtip',
-            buttons: [
-                { extend: 'copy', text: '<i class="bi bi-copy"></i> Copiar' },
-                { extend: 'excel', text: '<i class="bi bi-file-earmark-excel"></i> Excel' },
-                { extend: 'pdf', text: '<i class="bi bi-file-earmark-pdf"></i> PDF' },
-                { extend: 'print', text: '<i class="bi bi-printer"></i> Imprimir' }
-            ]
-        });
-
-        $('.select2').select2({
-            theme: 'bootstrap-5',
-            width: '100%'
-        });
-
-        $('.select2-producto').select2({
-            theme: 'bootstrap-5',
-            width: '100%',
-            ajax: {
-                url: '<?= BASE_URL ?>/modules/productos/buscar.php',
-                dataType: 'json',
-                delay: 250,
-                data: function(params) {
-                    return { q: params.term };
-                },
-                processResults: function(data) {
-                    return { results: data };
-                },
-                cache: true
-            },
-            minimumInputLength: 1,
-            placeholder: 'Buscar producto...'
-        });
+    $('.select2').each(function() {
+        if (!$(this).data('select2')) {
+            $(this).select2({
+                theme: 'bootstrap-5',
+                width: '100%'
+            });
+        }
     });
+});
 
-    function confirmarEliminar(mensaje) {
-        return Swal.fire({
-            title: '¿Estás seguro?',
-            text: mensaje || 'Esta acción no se puede deshacer',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar'
-        });
-    }
+function confirmarEliminar(mensaje) {
+    return Swal.fire({
+        title: '¿Estás seguro?',
+        text: mensaje || 'Esta acción no se puede deshacer',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    });
+}
 
-    function toastSuccess(mensaje) {
-        Swal.fire({ icon: 'success', title: 'Éxito', text: mensaje, timer: 3000, showConfirmButton: false });
-    }
+function toastSuccess(mensaje) {
+    Swal.fire({ icon: 'success', title: 'Éxito', text: mensaje, timer: 3000, showConfirmButton: false });
+}
 
-    function toastError(mensaje) {
-        Swal.fire({ icon: 'error', title: 'Error', text: mensaje, timer: 5000, showConfirmButton: false });
-    }
+function toastError(mensaje) {
+    Swal.fire({ icon: 'error', title: 'Error', text: mensaje, timer: 5000, showConfirmButton: false });
+}
 
-    function toastWarning(mensaje) {
-        Swal.fire({ icon: 'warning', title: 'Atención', text: mensaje, timer: 4000, showConfirmButton: false });
-    }
+function toastWarning(mensaje) {
+    Swal.fire({ icon: 'warning', title: 'Atención', text: mensaje, timer: 4000, showConfirmButton: false });
+}
 </script>
 </body>
 </html>
